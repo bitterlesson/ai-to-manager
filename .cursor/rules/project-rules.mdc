@@ -1,0 +1,253 @@
+# AI 할 일 관리 웹 서비스 - 프로젝트 개발 규칙
+
+이 문서는 "AI 할 일 관리 웹 서비스" 프로젝트의 개발 규칙을 정의합니다.
+
+## 1. 프로젝트 개요
+
+- **프로젝트명**: AI 할 일 관리 웹 서비스
+- **프레임워크**: Next.js 15 (App Router)
+- **목적**: AI 기능을 활용한 직관적이고 효율적인 할 일 관리 애플리케이션
+
+## 2. 핵심 원칙
+
+### 2.1 사용자 경험 최우선
+- 모든 UI 상태를 명확하게 표시한다
+  - **로딩 상태**: 스켈레톤 UI 또는 스피너 사용
+  - **빈 상태**: 안내 메시지와 액션 버튼 제공
+  - **오류 상태**: 사용자 친화적인 오류 메시지와 재시도 옵션 제공
+- 상호작용 지연을 최소화한다
+  - Optimistic UI 업데이트 적극 활용
+  - 적절한 로딩 인디케이터 사용
+  - 불필요한 리렌더링 방지
+
+### 2.2 철저한 오류 처리
+- **서버 측**: 모든 API 요청과 데이터베이스 작업에 try-catch 적용
+- **클라이언트 측**: 비동기 작업과 사용자 입력 처리 시 예외 처리
+- **오류 메시지**:
+  - 프로덕션: 사용자에게 한글로 친절한 메시지 제공
+  - 개발 환경: 상세한 로그와 스택 트레이스 출력
+- **오류 바운더리**: React Error Boundary 활용
+
+## 3. 기술 스택
+
+### 3.1 코어 기술
+- **Next.js 15**: App Router 사용 필수
+- **TypeScript**: 모든 파일에 TypeScript 적용 (`strict: true` 권장)
+- **Node.js**: LTS 버전 사용
+
+### 3.2 스타일링
+- **Tailwind CSS**: 유틸리티 우선 스타일링
+- **Shadcn/ui**: 재사용 가능한 UI 컴포넌트 라이브러리
+- **디자인 시스템**: 일관된 색상, 간격, 타이포그래피 유지
+
+### 3.3 백엔드 및 인프라
+- **Supabase**: 
+  - Authentication (사용자 인증)
+  - Database (PostgreSQL)
+  - Real-time subscriptions (필요시)
+- **AI SDK**: AI 모델 연동 및 스트리밍 응답 처리
+
+### 3.4 개발 도구
+- **ESLint**: Next.js 및 TypeScript 규칙 기반
+- **Prettier**: 코드 포맷팅 (선택사항, 일관성 유지 필요시)
+
+## 4. 코딩 스타일 가이드
+
+### 4.1 컴포넌트 작성
+- **함수형 컴포넌트** 사용 필수
+- **화살표 함수** 형식으로 모든 함수 작성
+  ```typescript
+  // ✅ 올바른 예시
+  const TodoList = () => {
+    return <div>...</div>;
+  };
+  
+  const handleSubmit = (data: FormData) => {
+    // 처리 로직
+  };
+  
+  // ❌ 잘못된 예시
+  function TodoList() {
+    return <div>...</div>;
+  }
+  
+  function handleSubmit(data: FormData) {
+    // 처리 로직
+  }
+  ```
+
+### 4.2 파일 및 폴더 명명 규칙
+- **컴포넌트 파일**: 파스칼 케이스 (PascalCase)
+  - 예: `TodoList.tsx`, `TaskCard.tsx`, `UserProfile.tsx`
+- **유틸리티/헬퍼 파일**: 케밥 케이스 (kebab-case) 또는 카멜 케이스 (camelCase)
+  - 예: `api-client.ts`, `date-utils.ts`, `formatDate.ts`
+- **폴더명**: 케밥 케이스 권장
+  - 예: `components/ui/`, `lib/api-client/`, `app/(dashboard)/`
+
+### 4.3 주석 작성 규칙 (필수)
+- **한글 주석 필수**: 모든 함수와 컴포넌트에 한글 설명 추가
+- **함수/컴포넌트 상단**: 한 문장으로 개요 작성
+- **JSDoc 형식**: 복잡한 함수는 JSDoc으로 상세 설명
+
+```typescript
+/**
+ * 할 일 목록을 표시하고 관리하는 컴포넌트
+ * @param todos - 표시할 할 일 배열
+ * @param onUpdate - 할 일 업데이트 시 호출되는 콜백 함수
+ */
+const TodoList = ({ todos, onUpdate }: TodoListProps) => {
+  // 할 일 항목을 렌더링
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <TodoItem key={todo.id} todo={todo} onUpdate={onUpdate} />
+      ))}
+    </ul>
+  );
+};
+
+/**
+ * 날짜를 사용자 친화적인 한글 형식으로 변환
+ * @param date - 변환할 Date 객체
+ * @returns "2026년 1월 9일" 형식의 문자열
+ */
+const formatDate = (date: Date): string => {
+  // 구현
+};
+```
+
+### 4.4 TypeScript 사용
+- **타입 정의**: `interface` 또는 `type` 사용
+- **any 금지**: `unknown` 또는 적절한 타입 사용
+- **타입 가드**: 런타임 타입 체크 활용
+- **Enum**: 가능하면 `as const` 사용
+
+```typescript
+// ✅ 올바른 예시
+interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: Date;
+}
+
+const STATUS = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+} as const;
+
+type Status = typeof STATUS[keyof typeof STATUS];
+
+// ❌ 잘못된 예시
+let data: any;
+```
+
+## 5. 프로젝트 구조
+
+```
+ai-todo-manager/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # 인증 관련 라우트 그룹
+│   ├── (dashboard)/       # 대시보드 라우트 그룹
+│   ├── api/               # API 라우트
+│   ├── layout.tsx         # 루트 레이아웃
+│   └── page.tsx           # 홈 페이지
+├── components/            # React 컴포넌트
+│   ├── ui/               # Shadcn/ui 컴포넌트
+│   ├── features/         # 기능별 컴포넌트
+│   └── shared/           # 공유 컴포넌트
+├── lib/                   # 유틸리티 및 설정
+│   ├── supabase/         # Supabase 클라이언트
+│   ├── ai/               # AI SDK 설정
+│   └── utils/            # 헬퍼 함수
+├── hooks/                 # 커스텀 React 훅
+├── types/                 # TypeScript 타입 정의
+└── public/               # 정적 파일
+```
+
+## 6. 코드 품질
+
+### 6.1 ESLint 규칙 준수
+- 모든 코드는 ESLint 규칙을 통과해야 한다
+- 커밋 전 `npm run lint` 실행 권장
+- `eslint-disable` 사용은 최소화하고, 사용 시 주석으로 이유 명시
+
+### 6.2 성능 최적화
+- **React 메모이제이션**: `useMemo`, `useCallback` 적절히 사용
+- **이미지 최적화**: Next.js Image 컴포넌트 사용
+- **번들 크기**: 동적 import로 코드 스플리팅
+- **서버 컴포넌트**: 가능한 경우 Server Components 활용
+
+### 6.3 접근성 (Accessibility)
+- 시맨틱 HTML 사용
+- ARIA 속성 적절히 활용
+- 키보드 네비게이션 지원
+- 색상 대비 및 폰트 크기 고려
+
+## 7. Git 커밋 규칙
+
+### 7.1 커밋 메시지 형식
+```
+<타입>: <제목>
+
+<본문 (선택사항)>
+```
+
+### 7.2 타입 종류
+- `feat`: 새로운 기능 추가
+- `fix`: 버그 수정
+- `docs`: 문서 수정
+- `style`: 코드 포맷팅, 세미콜론 누락 등
+- `refactor`: 코드 리팩토링
+- `test`: 테스트 코드 추가/수정
+- `chore`: 빌드 업무, 패키지 매니저 설정 등
+
+### 7.3 예시
+```
+feat: 할 일 생성 기능 추가
+
+사용자가 새로운 할 일을 추가할 수 있는 폼 컴포넌트를 구현했습니다.
+- AI 제안 기능 통합
+- 입력 유효성 검사 추가
+```
+
+## 8. 환경 변수 관리
+
+### 8.1 파일 구조
+- `.env.local`: 로컬 개발 환경 (Git 무시)
+- `.env.example`: 환경 변수 템플릿 (Git 포함)
+
+### 8.2 네이밍 규칙
+- 클라이언트 변수: `NEXT_PUBLIC_` 접두사 필수
+- 서버 변수: 접두사 없음
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# AI
+AI_API_KEY=your_ai_api_key
+```
+
+## 9. 테스트 (추후 확장)
+
+- 단위 테스트: Jest + React Testing Library
+- E2E 테스트: Playwright (선택사항)
+- 테스트 커버리지 목표: 70% 이상
+
+## 10. 배포 및 CI/CD
+
+- **Vercel**: Next.js 배포 플랫폼 권장
+- **환경 분리**: development, staging, production
+- **자동 배포**: main 브랜치 푸시 시 자동 배포
+
+---
+
+## 참고 사항
+
+- 이 문서는 프로젝트 진행에 따라 업데이트될 수 있습니다
+- 팀원 간 합의를 통해 규칙을 개선해 나갑니다
+- 궁금한 사항은 팀 채널에서 논의합니다
