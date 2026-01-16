@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -26,11 +27,20 @@ interface HeaderProps {
 }
 
 export const Header = ({ user, onLogout }: HeaderProps) => {
+  const router = useRouter();
+
   /**
    * 사용자 이름의 첫 글자 추출 (아바타 표시용)
    */
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase();
+  };
+
+  /**
+   * 프로필 페이지로 이동
+   */
+  const handleProfileClick = () => {
+    router.push("/profile");
   };
 
   /**
@@ -81,11 +91,11 @@ export const Header = ({ user, onLogout }: HeaderProps) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
                 <span>프로필</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>설정</span>
               </DropdownMenuItem>
