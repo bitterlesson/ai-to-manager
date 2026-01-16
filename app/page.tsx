@@ -84,10 +84,10 @@ export default function HomePage() {
     // 인증 상태 변화 실시간 감지
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === "SIGNED_OUT" || !session) {
-          // 로그아웃 시
+        if (event === "SIGNED_OUT") {
+          // 로그아웃 시 (명시적 SIGNED_OUT 이벤트만 처리)
           setUser(null);
-          router.push("/login");
+          window.location.href = "/login";
         } else if (event === "SIGNED_IN" && session) {
           // 로그인 시
           setUser(session.user);
@@ -239,9 +239,8 @@ export default function HomePage() {
         // Supabase 로그아웃
         await signOut();
         
-        // 로그인 페이지로 이동
-        router.push("/login");
-        router.refresh();
+        // 로그인 페이지로 이동 (강제 새로고침으로 상태 초기화)
+        window.location.href = "/login";
       } catch (error) {
         console.error("로그아웃 중 오류 발생:", error);
         alert("로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.");

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://ai-todo-manager.vercel.app",
+    url: "https://ai-to-manager.vercel.app",
     siteName: "AI 할 일 관리 서비스",
     title: "AI 할 일 관리 서비스",
     description: "AI가 도와주는 똑똑한 할 일 관리 서비스",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   },
   
   // 기타 설정
-  metadataBase: new URL("https://ai-todo-manager.vercel.app"),
+  metadataBase: new URL("https://ai-to-manager.vercel.app"),
   alternates: {
     canonical: "/",
   },
