@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
+import { Footer } from "@/components/dashboard/Footer";
 import { Toolbar } from "@/components/dashboard/Toolbar";
 import { TodoSummary } from "@/components/dashboard/TodoSummary";
 import { TodoForm } from "@/components/todo/TodoForm";
@@ -418,6 +419,9 @@ export default function HomePage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 푸터 */}
+      <Footer />
     </div>
   );
 }

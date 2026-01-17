@@ -35,21 +35,28 @@
 - **TypeScript**: 모든 파일에 TypeScript 적용 (`strict: true` 권장)
 - **Node.js**: LTS 버전 사용
 
-### 3.2 스타일링
+### 3.2 스타일링 및 UI
 - **Tailwind CSS**: 유틸리티 우선 스타일링
 - **Shadcn/ui**: 재사용 가능한 UI 컴포넌트 라이브러리
+- **next-themes**: 다크/라이트/시스템 테마 지원
+- **sonner**: 토스트 알림 (`toast.success()`, `toast.error()`)
 - **디자인 시스템**: 일관된 색상, 간격, 타이포그래피 유지
 
 ### 3.3 백엔드 및 인프라
 - **Supabase**: 
-  - Authentication (사용자 인증)
-  - Database (PostgreSQL)
+  - Authentication (사용자 인증, 이메일 인증)
+  - Database (PostgreSQL + RLS)
   - Real-time subscriptions (필요시)
-- **AI SDK**: AI 모델 연동 및 스트리밍 응답 처리
+- **Google Gemini API**: AI 자연어 파싱 및 분석 (gemini-2.0-flash-exp)
+- **Vercel AI SDK**: AI 모델 연동 및 스트리밍 응답 처리
+- **Resend**: 이메일 발송 (지연 알림 등)
+- **Vercel Cron Jobs**: 스케줄러 (일일 알림 체크)
 
 ### 3.4 개발 도구
 - **ESLint**: Next.js 및 TypeScript 규칙 기반
 - **Prettier**: 코드 포맷팅 (선택사항, 일관성 유지 필요시)
+- **date-fns**: 날짜 처리 및 포맷팅
+- **zod**: 스키마 검증 (API 응답 등)
 
 ## 4. 코딩 스타일 가이드
 
@@ -147,23 +154,33 @@ let data: any;
 
 ```
 ai-todo-manager/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # 인증 관련 라우트 그룹
-│   ├── (dashboard)/       # 대시보드 라우트 그룹
-│   ├── api/               # API 라우트
-│   ├── layout.tsx         # 루트 레이아웃
-│   └── page.tsx           # 홈 페이지
-├── components/            # React 컴포넌트
-│   ├── ui/               # Shadcn/ui 컴포넌트
-│   ├── features/         # 기능별 컴포넌트
-│   └── shared/           # 공유 컴포넌트
-├── lib/                   # 유틸리티 및 설정
-│   ├── supabase/         # Supabase 클라이언트
-│   ├── ai/               # AI SDK 설정
-│   └── utils/            # 헬퍼 함수
-├── hooks/                 # 커스텀 React 훅
-├── types/                 # TypeScript 타입 정의
-└── public/               # 정적 파일
+├── app/                        # Next.js App Router
+│   ├── api/                   # API 라우트
+│   │   ├── ai/               # AI API (parse-todo, analyze-todos)
+│   │   └── cron/             # Cron Jobs (check-overdue)
+│   ├── login/                 # 로그인 페이지
+│   ├── signup/                # 회원가입 페이지
+│   ├── forgot-password/       # 비밀번호 찾기
+│   ├── profile/               # 프로필 페이지
+│   ├── settings/              # 설정 페이지
+│   ├── layout.tsx             # 루트 레이아웃 (메타데이터, 테마)
+│   ├── page.tsx               # 메인 대시보드
+│   ├── favicon.ico            # 파비콘
+│   └── apple-icon.png         # Apple 아이콘
+├── components/                # React 컴포넌트
+│   ├── ui/                   # Shadcn/ui 컴포넌트
+│   ├── auth/                 # 인증 관련 컴포넌트
+│   ├── dashboard/            # 대시보드 (Header, Toolbar, TodoSummary)
+│   ├── providers/            # Provider 컴포넌트 (ThemeProvider)
+│   └── todo/                 # Todo 컴포넌트 (Form, List, Card)
+├── lib/                       # 유틸리티 및 설정
+│   ├── supabase/             # Supabase 클라이언트 및 인증
+│   ├── email/                # Resend 이메일 서비스
+│   └── utils.ts              # 헬퍼 함수 (cn 등)
+├── hooks/                     # 커스텀 React 훅
+├── types/                     # TypeScript 타입 정의
+├── docs/                      # 프로젝트 문서
+└── vercel.json                # Vercel 설정 (Cron Jobs)
 ```
 
 ## 6. 코드 품질
@@ -184,6 +201,56 @@ ai-todo-manager/
 - ARIA 속성 적절히 활용
 - 키보드 네비게이션 지원
 - 색상 대비 및 폰트 크기 고려
+
+### 6.4 테마 관리
+- **ThemeProvider**: `next-themes` 사용, `components/providers/ThemeProvider.tsx`
+- **테마 옵션**: `light`, `dark`, `system`
+- **설정 방법**: `useTheme()` 훅 사용
+- **주의**: `suppressHydrationWarning`을 `<html>` 태그에 추가
+
+```typescript
+// 테마 사용 예시
+const { theme, setTheme } = useTheme();
+setTheme("dark"); // "light" | "dark" | "system"
+```
+
+### 6.5 토스트 알림
+- **라이브러리**: `sonner` 사용
+- **성공**: `toast.success("메시지")`
+- **오류**: `toast.error("메시지")`
+- **정보**: `toast.info("메시지")`
+- **Toaster 컴포넌트**: `layout.tsx`에 추가
+
+```typescript
+import { toast } from "sonner";
+
+// 사용 예시
+toast.success("할 일이 추가되었습니다!");
+toast.error("오류가 발생했습니다.");
+```
+
+### 6.6 API 라우트 패턴
+- **위치**: `app/api/` 폴더
+- **파일명**: `route.ts`
+- **에러 처리**: 모든 API에 try-catch 적용
+- **응답 형식**: `NextResponse.json()` 사용
+
+```typescript
+// API 라우트 예시
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    // 처리 로직
+    return NextResponse.json({ success: true, data: result });
+  } catch (error: any) {
+    console.error("API 오류:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
 
 ## 7. Git 커밋 규칙
 
@@ -228,8 +295,14 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# AI
-AI_API_KEY=your_ai_api_key
+# Google Gemini AI
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_api_key
+
+# Email (Resend)
+RESEND_API_KEY=your_resend_api_key
+
+# Cron Job 인증 (선택)
+CRON_SECRET=your_cron_secret
 ```
 
 ## 9. 테스트 (추후 확장)
@@ -243,6 +316,25 @@ AI_API_KEY=your_ai_api_key
 - **Vercel**: Next.js 배포 플랫폼 권장
 - **환경 분리**: development, staging, production
 - **자동 배포**: main 브랜치 푸시 시 자동 배포
+- **Cron Jobs**: `vercel.json`에서 설정
+
+```json
+// vercel.json
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-overdue",
+      "schedule": "0 0 * * *"  // 매일 UTC 0시 (KST 9시)
+    }
+  ]
+}
+```
+
+### 10.1 배포 체크리스트
+- [ ] 환경 변수 설정 완료 (Vercel Dashboard)
+- [ ] Supabase RLS 정책 확인
+- [ ] 메타데이터 및 OG 이미지 확인
+- [ ] favicon 및 아이콘 확인
 
 ---
 

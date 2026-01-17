@@ -1,0 +1,130 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, FileText, Loader2 } from "lucide-react";
+
+/**
+ * 변경 이력 페이지
+ * CHANGELOG.md 파일을 읽어서 마크다운으로 렌더링
+ */
+export default function ChangelogPage() {
+  const router = useRouter();
+  const [content, setContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * CHANGELOG.md 파일 로드
+   */
+  useEffect(() => {
+    const loadChangelog = async () => {
+      try {
+        const response = await fetch("/api/changelog");
+        if (response.ok) {
+          const data = await response.json();
+          setContent(data.content);
+        } else {
+          setContent("변경 이력을 불러오는데 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("변경 이력 로드 실패:", error);
+        setContent("변경 이력을 불러오는데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChangelog();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* 헤더 */}
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            돌아가기
+          </Button>
+        </div>
+      </header>
+
+      {/* 메인 콘텐츠 */}
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-6 w-6" />
+              변경 이력
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown
+                  components={{
+                    // 헤딩 스타일
+                    h1: ({ children }) => (
+                      <h1 className="text-2xl font-bold mb-4 pb-2 border-b">
+                        {children}
+                      </h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-xl font-semibold mt-8 mb-4 text-primary">
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-lg font-medium mt-4 mb-2">
+                        {children}
+                      </h3>
+                    ),
+                    // 리스트 스타일
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside space-y-1 mb-4">
+                        {children}
+                      </ul>
+                    ),
+                    li: ({ children }) => (
+                      <li className="text-muted-foreground">{children}</li>
+                    ),
+                    // 강조 스타일
+                    strong: ({ children }) => (
+                      <strong className="font-semibold text-foreground">
+                        {children}
+                      </strong>
+                    ),
+                    // 구분선
+                    hr: () => <hr className="my-6 border-border" />,
+                    // 체크박스 리스트
+                    input: ({ checked }) => (
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        readOnly
+                        className="mr-2"
+                      />
+                    ),
+                  }}
+                >
+                  {content}
+                </ReactMarkdown>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+}
