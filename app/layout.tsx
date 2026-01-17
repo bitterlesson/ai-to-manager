@@ -67,11 +67,10 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   
-  // 아이콘 설정
+  // 아이콘 설정 (app/ 폴더의 favicon.ico, apple-icon.png 자동 인식)
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    apple: "/apple-icon.png",
   },
   
   // 기타 설정
