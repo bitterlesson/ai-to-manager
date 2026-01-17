@@ -44,6 +44,13 @@ export const Header = ({ user, onLogout }: HeaderProps) => {
   };
 
   /**
+   * 설정 페이지로 이동
+   */
+  const handleSettingsClick = () => {
+    router.push("/settings");
+  };
+
+  /**
    * 로그아웃 핸들러
    */
   const handleLogout = () => {
@@ -95,7 +102,7 @@ export const Header = ({ user, onLogout }: HeaderProps) => {
                 <User className="mr-2 h-4 w-4" />
                 <span>프로필</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>설정</span>
               </DropdownMenuItem>

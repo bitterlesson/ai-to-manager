@@ -88,3 +88,37 @@ export const getSession = async () => {
 
   return session;
 };
+
+/**
+ * 사용자 알림 설정 업데이트
+ */
+export const updateNotificationSettings = async (settings: {
+  emailNotificationEnabled?: boolean;
+}) => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.auth.updateUser({
+    data: settings,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+/**
+ * 사용자 알림 설정 가져오기
+ */
+export const getNotificationSettings = async () => {
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    return { emailNotificationEnabled: true }; // 기본값
+  }
+
+  return {
+    emailNotificationEnabled: user.user_metadata?.emailNotificationEnabled ?? true,
+  };
+};
