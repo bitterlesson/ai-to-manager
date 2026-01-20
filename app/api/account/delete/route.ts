@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 /**
  * 계정 삭제 API
@@ -8,18 +8,18 @@ import { createClient as createBrowserClient } from "@/lib/supabase/client";
  */
 export async function DELETE(request: NextRequest) {
   try {
-    // 1. 현재 로그인된 사용자 확인 (브라우저 클라이언트로)
-    const browserClient = createBrowserClient();
-    const { data: { session } } = await browserClient.auth.getSession();
+    // 1. 현재 로그인된 사용자 확인 (서버 클라이언트로)
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json(
         { error: "인증되지 않은 사용자입니다." },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // 2. service_role 키로 Supabase Admin 클라이언트 생성
     const supabaseAdmin = createClient(
