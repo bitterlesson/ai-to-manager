@@ -421,7 +421,7 @@ export default function HomePage() {
       </Dialog>
 
       {/* 푸터 */}
-      <Footer />
+      <Footer userId={user?.id} />
     </div>
   );
 }
