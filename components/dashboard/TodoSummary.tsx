@@ -397,35 +397,42 @@ const WeekPreview = ({
       <div className="space-y-2">
         <div className="text-xs text-muted-foreground font-medium">요일별 분포</div>
         <div className="grid grid-cols-7 gap-1">
-          {distribution.map((day, index) => (
-            <div 
-              key={index} 
-              className={`text-center ${day.isToday ? "bg-primary/10 rounded-lg" : ""}`}
-            >
-              <div className={`text-[10px] font-medium ${day.isToday ? "text-primary" : "text-muted-foreground"}`}>
-                {day.day}
-              </div>
-              <div className="h-12 flex items-end justify-center p-1">
-                {day.total > 0 ? (
-                  <div className="w-full flex flex-col gap-0.5">
+          {distribution.map((day, index) => {
+            const maxBarHeight = 40; // 최대 bar 높이 (px)
+            const barHeight = day.total > 0 ? Math.max((day.total / maxTotal) * maxBarHeight, 6) : 0;
+            const completedRatio = day.total > 0 ? (day.completed / day.total) * 100 : 0;
+            
+            return (
+              <div 
+                key={index} 
+                className={`text-center ${day.isToday ? "bg-primary/10 rounded-lg" : ""}`}
+              >
+                <div className={`text-[10px] font-medium ${day.isToday ? "text-primary" : "text-muted-foreground"}`}>
+                  {day.day}
+                </div>
+                <div className="h-12 flex items-end justify-center p-1">
+                  {day.total > 0 ? (
                     <div 
-                      className="w-full bg-muted rounded-sm transition-all"
-                      style={{ height: `${(day.total / maxTotal) * 100}%`, minHeight: "4px" }}
-                    />
-                    {day.completed > 0 && (
+                      className="w-4/5 bg-muted rounded-sm overflow-hidden transition-all"
+                      style={{ height: `${barHeight}px` }}
+                    >
+                      {/* 완료된 부분 (아래에서부터 채워짐) */}
                       <div 
-                        className="w-full bg-green-500 rounded-sm transition-all"
-                        style={{ height: `${(day.completed / maxTotal) * 100}%`, minHeight: "2px" }}
+                        className="w-full bg-green-500 transition-all"
+                        style={{ 
+                          height: `${completedRatio}%`,
+                          marginTop: `${100 - completedRatio}%`
+                        }}
                       />
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-full h-1 bg-muted/50 rounded-sm" />
-                )}
+                    </div>
+                  ) : (
+                    <div className="w-4/5 h-1 bg-muted/50 rounded-sm" />
+                  )}
+                </div>
+                <div className="text-[10px] text-muted-foreground">{day.total}</div>
               </div>
-              <div className="text-[10px] text-muted-foreground">{day.total}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
           <div className="flex items-center gap-1">
