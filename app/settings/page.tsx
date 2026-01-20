@@ -28,7 +28,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Sun, Moon, Monitor, Globe, Trash2, Loader2, Bell } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { getCurrentUser, signOut, updateNotificationSettings } from "@/lib/supabase/auth";
 import { toast } from "sonner";
 
@@ -116,6 +115,7 @@ export default function SettingsPage() {
 
   /**
    * 계정 삭제 핸들러
+   * API를 통해 Supabase Auth에서 사용자 완전 삭제
    */
   const handleDeleteAccount = async () => {
     if (!userId) return;
@@ -123,23 +123,21 @@ export default function SettingsPage() {
     setIsDeleting(true);
 
     try {
-      const supabase = createClient();
+      // 1. 계정 삭제 API 호출
+      const response = await fetch("/api/account/delete", {
+        method: "DELETE",
+      });
 
-      // 1. 사용자의 모든 todos 삭제
-      const { error: todosError } = await supabase
-        .from("todos")
-        .delete()
-        .eq("user_id", userId);
+      const result = await response.json();
 
-      if (todosError) {
-        console.error("할 일 삭제 실패:", todosError);
-        // 계속 진행 (todos가 없을 수도 있음)
+      if (!response.ok) {
+        throw new Error(result.error || "계정 삭제에 실패했습니다.");
       }
 
       // 2. 로그아웃
       await signOut();
 
-      toast.success("계정 데이터가 삭제되었습니다. 완전한 계정 삭제를 원하시면 관리자에게 문의해주세요.");
+      toast.success("계정이 완전히 삭제되었습니다.");
       
       // 3. 로그인 페이지로 이동
       window.location.href = "/login";
