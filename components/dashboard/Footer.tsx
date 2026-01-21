@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, MessageSquare } from "lucide-react";
+import { FileText, MessageSquare, Scale } from "lucide-react";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 
 /**
@@ -30,19 +30,31 @@ export const Footer = ({ userId }: FooterProps) => {
 
             {/* 링크 */}
             <div className="flex items-center gap-4">
-              {/* 피드백 버튼 (로그인 시에만 표시) */}
-              {userId && (
-                <button
-                  onClick={() => setIsFeedbackOpen(true)}
-                  className="flex items-center gap-1 hover:text-foreground transition-colors"
-                >
-                  <MessageSquare className="h-3 w-3" />
-                  <span>피드백</span>
-                </button>
-              )}
+              {/* 이용약관 */}
+              <Link
+                href="/terms"
+                className="flex items-center gap-1 hover:text-foreground transition-colors"
+              >
+                <Scale className="h-3 w-3" />
+                <span>이용약관</span>
+              </Link>
 
               {/* 구분선 */}
-              {userId && <span className="text-border">|</span>}
+              <span className="text-border">|</span>
+
+              {/* 피드백 버튼 (로그인 시에만 표시) */}
+              {userId && (
+                <>
+                  <button
+                    onClick={() => setIsFeedbackOpen(true)}
+                    className="flex items-center gap-1 hover:text-foreground transition-colors"
+                  >
+                    <MessageSquare className="h-3 w-3" />
+                    <span>피드백</span>
+                  </button>
+                  <span className="text-border">|</span>
+                </>
+              )}
 
               {/* 변경 이력 */}
               <Link
